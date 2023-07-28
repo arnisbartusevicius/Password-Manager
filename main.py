@@ -1,14 +1,14 @@
-# TO DO LIST:
-#     General refining of the software
 import os
 import pwinput
 import time
 import configparser
 import pyperclip
+import csv
 from configparser import ConfigParser
 from colorama import init as colorama_init
 from colorama import Fore
 from colorama import Style
+from cryptography.fernet import Fernet
 
 config_object = ConfigParser()
 logindata_object = ConfigParser()
@@ -35,6 +35,21 @@ userchecks = True
 passwordchangestatus = True
 passwordchangestatusopt2 = True
 passwordchangestatusopt3 = True
+key = None
+section_name = "Encryption"
+
+if os.path.getsize("key.csv") > 1:
+    try:
+        with open("key.csv", mode='r') as key_file:
+            csv_reader = csv.DictReader(key_file)
+            for row in csv_reader:
+                key = row['key']
+                fernet = Fernet(key)
+                break
+    except FileNotFoundError:
+        print("key.csv does not exist")
+    
+
 
 while login == True:
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -56,7 +71,8 @@ while login == True:
                         username = str(section)
                         if initusername == str(section):
                             checkone = True
-                        if initpassword == str(value):
+                        decryptedvalue = fernet.decrypt(value).decode()
+                        if initpassword == str(decryptedvalue):
                             checktwo = True
                     break
                 if checkone == True and checktwo == True:
@@ -78,12 +94,22 @@ while login == True:
                     firstpassword = pwinput.pwinput("Please type your new password: ")
                     confirmfirstpassword = pwinput.pwinput("Please type your new password again: ")
                     if firstpassword == confirmfirstpassword:
+                        with open('key.csv', 'w') as f:
+                            f.truncate(0)
+                        key = Fernet.generate_key()
+                        key = key.decode('utf-8')
+                        with open("key.csv", mode='w', newline='') as key_file:
+                            csv_writer = csv.writer(key_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                            csv_writer.writerow(["key"])
+                            csv_writer.writerow([key])
+                        fernet = Fernet(key)
                         logindata_object.read('logindata.ini')
                         logindata_object.clear()
                         config_object.read('config.ini')
                         config_object.clear()
                         logindata_object.add_section(firstusername)
-                        logindata_object[firstusername]['password'] = firstpassword
+                        encodedpassword = fernet.encrypt(firstpassword.encode())
+                        logindata_object[firstusername]['password'] = str(encodedpassword.decode('utf-8'))
                         with open('logindata.ini', 'w') as conf:
                             logindata_object.write(conf)
                         with open('config.ini', 'w') as conf:
@@ -122,6 +148,24 @@ while login == True:
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
+try:
+    with open("key.csv", mode='r') as key_file:
+        csv_reader = csv.DictReader(key_file)
+        for row in csv_reader:
+            key = row['key']
+            break
+except FileNotFoundError:
+    print("key.csv does not exist")
+
+if not key:
+    key = Fernet.generate_key()
+    key = key.decode('utf-8')
+    with open("key.csv", mode='w', newline='') as key_file:
+        csv_writer = csv.writer(key_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        csv_writer.writerow(["key"])
+        csv_writer.writerow([key])
+fernet = Fernet(key)
+
 while status == True:
     print(f"{Fore.RED}{Style.BRIGHT}Arnis' Password Manager{Style.RESET_ALL}")
     print(f"{Fore.GREEN}Welcome, {username}!{Style.RESET_ALL}")
@@ -139,15 +183,17 @@ while status == True:
         confirmpass = pwinput.pwinput("Please type the password again: ")
         if newpassword == confirmpass:
             time.sleep(1)
+            encodedpassword = fernet.encrypt(newpassword.encode())
             print(f"{Fore.GREEN}New password for {newpasswordname.upper()} has been succesfully saved and {Fore.RED}encrypted.{Style.RESET_ALL}")
             time.sleep(2)
             os.system('cls' if os.name == 'nt' else 'clear')
             config_object.read('config.ini')
             if newpasswordname.upper() not in config_object.sections():
                 config_object.add_section(newpasswordname.upper())
-            config_object[newpasswordname.upper()]['password'] = newpassword
+            config_object[newpasswordname.upper()]['password'] = str(encodedpassword.decode('utf-8'))
             with open('config.ini', 'w') as conf:
                 config_object.write(conf)
+                encodedpassword = None
         else:
             os.system('cls' if os.name == 'nt' else 'clear')
             print(f"{Fore.RED}ERROR: Password Does Not Match{Style.RESET_ALL}")
@@ -180,7 +226,6 @@ while status == True:
             config.read("config.ini")
             for num, (section, value) in enumerate(config.items()):
                 for option, value in config.items(section):
-                    # print("[",num,"]", section)
                     print(f"[{num}] {Fore.GREEN}{section}{Style.RESET_ALL}")
             accesspassword = input(f"Type '{Fore.RED}exit{Style.RESET_ALL}' if you would like to go back. \n Which password would you like to access?: ").upper()
             if accesspassword == "EXIT":
@@ -191,10 +236,11 @@ while status == True:
                 for option, value in config.items(section):
                     if accesspassword == str(num) or accesspassword == section.upper():
                         os.system('cls' if os.name == 'nt' else 'clear')
+                        decryptedvalue = fernet.decrypt(value).decode()
                         print(f"{Fore.GREEN}Decrypting Password...{Style.RESET_ALL}")
                         time.sleep(2)
-                        print(f"{section} - {Fore.RED}{value}")
-                        pyperclip.copy(value)
+                        print(f"{section} - {Fore.RED}{decryptedvalue}")
+                        pyperclip.copy(decryptedvalue)
                         print(f"{Fore.CYAN}Password has been copied to your clipboard{Style.RESET_ALL}")
                         print(f"What would you like to do? \n {Fore.GREEN}[1] Edit the name \n [2] Edit the password \n {Fore.RED}[3] Delete entry{Fore.GREEN} \n [4] Cancel{Style.RESET_ALL}")
                         passwordchange = input("")
@@ -204,7 +250,7 @@ while status == True:
                             if passwordchange == "1":
                                 os.system('cls' if os.name == 'nt' else 'clear')
                                 print(f"Type '{Fore.RED}exit{Style.RESET_ALL}' if you would like to cancel the edit")
-                                editedname = input("What would you like to change the username to?: ").upper()
+                                editedname = input("What would you like to change the entry name to?: ").upper()
                                 if editedname == "EXIT":
                                     os.system('cls' if os.name == 'nt' else 'clear')
                                     break
@@ -236,8 +282,9 @@ while status == True:
                                         while passwordchangestatusopt3 == True:
                                             editedpassconfirm = pwinput.pwinput("Please type your new password again: ")
                                             if editedpass == editedpassconfirm:
+                                                encodedpassword = fernet.encrypt(editedpass.encode())
                                                 config_object.read('config.ini')
-                                                config_object[section]['password'] = editedpass
+                                                config_object[section]['password'] = str(encodedpassword.decode('utf-8'))
                                                 with open('config.ini', 'w') as conf:
                                                     config_object.write(conf)
                                                 os.system('cls' if os.name == 'nt' else 'clear')
@@ -246,6 +293,7 @@ while status == True:
                                                 print(f"{Fore.GREEN}Password changed successfully{Style.RESET_ALL}")
                                                 time.sleep(1)
                                                 os.system('cls' if os.name == 'nt' else 'clear')
+                                                encodedpassword = None
                                                 passwordchangestatusopt2 = False
                                                 passwordchangestatus = False
                                                 passwordchangestatusopt3 = False
@@ -264,7 +312,7 @@ while status == True:
                                     print(f"{Fore.RED}Deleting Entry...{Style.RESET_ALL}")
                                     time.sleep(1)
                                     print(f"{Fore.RED}Entry Deleted{Style.RESET_ALL}")
-                                    print(section)
+                                    os.system('cls' if os.name == 'nt' else 'clear')
                                     config_object.read('config.ini')
                                     config_object.remove_section(section)
                                     with open('config.ini', 'w') as conf:
