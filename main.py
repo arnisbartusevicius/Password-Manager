@@ -138,6 +138,7 @@ while login == True:
         else:
             os.system('cls' if os.name == 'nt' else 'clear')
             print("Incorrect input, try again.")
+            firsttimeuser = ""
             time.sleep(1)
             os.system('cls' if os.name == 'nt' else 'clear')
             break
