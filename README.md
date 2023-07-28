@@ -1,0 +1,1 @@
+Arnis' Password Manager is a simple PM made using Python. APM features AES128 encryption. The key for it is generated inside the key.csv file, so don't share it. Everything else should be encrypted and safe.
