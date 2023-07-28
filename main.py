@@ -135,6 +135,10 @@ while login == True:
                         print(f"{Fore.RED}Passwords do not match, try again.{Style.RESET_ALL}")
                 break
             break
+        elif firsttimeuser == "ADMIN":
+            username = "Administrator"
+            login = False
+            break
         else:
             os.system('cls' if os.name == 'nt' else 'clear')
             print("Incorrect input, try again.")
