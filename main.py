@@ -118,15 +118,6 @@ while login == True:
                         os.system('cls' if os.name == 'nt' else 'clear')
                         print(f"{Fore.GREEN}Creating new account")
                         time.sleep(1)
-                        os.system('cls' if os.name == 'nt' else 'clear')
-                        print(f"{Fore.GREEN}Verifying user data")
-                        time.sleep(1)
-                        os.system('cls' if os.name == 'nt' else 'clear')
-                        print(f"{Fore.RED}Encrypting account details")
-                        time.sleep(2)
-                        os.system('cls' if os.name == 'nt' else 'clear')
-                        print(f"{Fore.CYAN}Resetting software to finish account setup{Style.RESET_ALL}")
-                        time.sleep(1)
                         firsttimeuser = "Y"
                         creationcounter += 1
                         break
@@ -179,10 +170,9 @@ while status == True:
         newpassword = pwinput.pwinput("What is the password?: ")
         confirmpass = pwinput.pwinput("Please type the password again: ")
         if newpassword == confirmpass:
-            time.sleep(1)
             encodedpassword = fernet.encrypt(newpassword.encode())
             print(f"{Fore.GREEN}New password for {newpasswordname.upper()} has been succesfully saved and {Fore.RED}encrypted.{Style.RESET_ALL}")
-            time.sleep(2)
+            time.sleep(1)
             os.system('cls' if os.name == 'nt' else 'clear')
             config_object.read('config.ini')
             if newpasswordname.upper() not in config_object.sections():
@@ -234,8 +224,6 @@ while status == True:
                     if accesspassword == str(num) or accesspassword == section.upper():
                         os.system('cls' if os.name == 'nt' else 'clear')
                         decryptedvalue = fernet.decrypt(value).decode()
-                        print(f"{Fore.GREEN}Decrypting Password...{Style.RESET_ALL}")
-                        time.sleep(2)
                         print(f"{section} - {Fore.RED}{decryptedvalue}")
                         pyperclip.copy(decryptedvalue)
                         print(f"{Fore.CYAN}Password has been copied to your clipboard{Style.RESET_ALL}")
