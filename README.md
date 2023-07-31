@@ -2,15 +2,21 @@
 # Arnis Password Manager
 
 Command based python manager written in Python3 utilizing **encryption chosen by the U.S. government to protect classified information.**
-
-
 ## Features
 
 - AES 128 **Encryption**
 - Passwords Saved Within **One** Master **Account**
 - **Create**, **Edit** and **Delete** Passwords Effortlessly
 - All Passwords Secured By **Your** Own Personal **Key**
+## Installation
 
+- Navigate to the directory where your requirements.txt file is located
+
+- Run the following command
+
+```bash
+  pip install -r requirements.txt
+```
 
 ## Feedback
 
