@@ -1,5 +1,5 @@
 
-# Arnis Password Manager
+# Arnis' Password Manager
 
 Command based python manager written in Python3 utilizing **encryption chosen by the U.S. government to protect classified information.**
 ## Features
