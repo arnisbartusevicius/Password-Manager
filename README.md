@@ -20,7 +20,9 @@ Command based python manager written in Python3 utilizing **encryption chosen by
 
 ## Feedback
 
-If you have any feedback, please reach out to me at arnisbartusevicius@proton.me
+If you have any feedback, please reach out to me at arnisbartusevicius@proton.me 
+
+Alternatively you can reach out to me on [Discord](https://discord.com/): @_arnis
 
 
 ## Authors
